@@ -1,3 +1,6 @@
+use core::f64;
+use std::io;
+
 fn main() {
     let value = 40.0;
     let celsius_value = fah_to_cel(value);
@@ -7,13 +10,15 @@ fn main() {
     println!("{celsius_value}C to Fahrenheit is {fah_value}F");
 
     // fibonacci
-    let num = 40;
+    let num = 4;
     let fib_val = get_fib_loop(num);
     let fib_val_rec = get_fib_recur(num);
     println!("zeroth number in Fib sequence is loop {fib_val}");
     println!("zeroth number in Fib sequence is rec {fib_val_rec}");
 
     twelve_days_christmas(12);
+
+    start_calculator();
 }
 
 fn fah_to_cel(val: f32) -> f32 {
@@ -83,4 +88,62 @@ fn twelve_days_christmas(n: usize) {
         let gift = GIFTS[num];
         println!("{gift}")
     }
+}
+
+fn start_calculator() {
+    loop {
+        println!("New calculator Session. ");
+
+        println!("Enter the left operand");
+        let input = accept_input();
+
+        let left: f64 = match input.trim().parse() {
+            Result::Ok(num) => num,
+            Result::Err(_) => {
+                println!("Invalid");
+                return;
+            }
+        };
+
+        println!("Enter the right operand");
+        let input = accept_input();
+
+        let right: f64 = match input.trim().parse() {
+            Result::Ok(num) => num,
+            Result::Err(_) => {
+                println!("Invalid");
+                return;
+            }
+        };
+
+        println!("Enter the operator. A for add, S for subtract, M for multiply, and D for divide");
+        let input = accept_input();
+        let operator = input.trim();
+
+        if operator == "A" {
+            let sum = left + right;
+            println!("{left} + {right} = {sum}");
+        } else if operator == "S" {
+            let diff = left - right;
+            println!("{left} - {right} = {diff}");
+        } else if operator == "M" {
+            let prod = left * right;
+            println!("{left} * {right} = {prod}");
+        } else if operator == "D" {
+            let quot = left / right;
+            println!("{left} / {right} = {quot}");
+        } else {
+            println!("Error processing! Invalid operator selected");
+        }
+    }
+}
+
+fn accept_input() -> String {
+    let mut input = "".to_string();
+
+    io::stdin()
+        .read_line(&mut input)
+        .expect("Error reading line");
+
+    return input;
 }
