@@ -1,5 +1,8 @@
 use core::f64;
-use std::io;
+use std::{
+  cmp::{max, min},
+  io,
+};
 
 #[derive(Debug)]
 struct User {
@@ -7,6 +10,18 @@ struct User {
   email: String,
   gender: String,
   active: bool,
+}
+
+#[derive(Debug)]
+struct Coords(i32, i32, i32);
+
+#[derive(Debug)]
+struct Color(i32, i32, String);
+
+#[derive(Debug)]
+struct Rectangle {
+  width: u32,
+  height: u32,
 }
 
 fn main() {
@@ -36,27 +51,98 @@ fn main() {
   // };
 
   // practice_struct();
-}
+  // practice_tuple_struct();
 
-fn practice_struct() {
-  let name = String::from("Steph");
-  let email = String::from("love@mail.com");
+  let area = rectangle_area(3, 4);
+  print!("{area}");
 
-  let mut user = build_user(email, name);
-
-  user.name = String::from("Cum");
-
-  println!("{:?} name: {}", user, user.name);
-
-  let user2 = User {
-    email: String::from("heartbreak"),
-    name: String::from("value"),
-    gender: String::from("value"),
-    ..user
+  let rectangle = Rectangle {
+    width: 3,
+    height: 9,
   };
 
-  println!("{:?} user {:?}", user2, user);
+  let rectangle2 = Rectangle {
+    width: 9,
+    height: 2,
+  };
+
+  let area_2 = rectangle_area_struct(&rectangle);
+  let can_rect_contain = rectangle.can_hold(&rectangle2);
+  println!("as struct {area_2} {:#?}", rectangle.area());
+  println!("can rectangle contain rectangle2? {can_rect_contain}");
+
+  let the_square = Rectangle::square(8);
+  println!("{:#?}", the_square);
 }
+
+fn rectangle_area(width: u32, height: u32) -> u32 {
+  width * height
+}
+
+impl Rectangle {
+  fn area(&self) -> u32 {
+    self.width * self.height
+  }
+
+  fn can_hold(&self, rect: &Rectangle) -> bool {
+    let self_max = max(self.width, self.height);
+    let self_min = min(self.width, self.height);
+
+    let rect_max = max(rect.width, rect.height);
+    let rect_min = min(rect.width, rect.height);
+
+    self_max > rect_max && self_min > rect_min
+  }
+
+  fn square(side: u32) -> Self {
+    Self {
+      width: 34.max(side),
+      height: side,
+    }
+  }
+}
+
+fn rectangle_area_struct(Rectangle { width, height }: &Rectangle) -> u32 {
+  // let Rectangle { width, height } = rect;
+  width * height
+}
+
+fn practice_tuple_struct() {
+  let mut a = (2, 3, 4);
+  a = (4, 5, 6);
+
+  let b = Color(3, 4, String::from("5"));
+  let Color(x, y, z) = b;
+
+  println!("{:>?}, {x} {y} {z}", a);
+}
+
+// fn practice_struct() {
+//   let name = String::from("Steph");
+//   let email = String::from("love@mail.com");
+
+//   let mut user = build_user(email, name);
+
+//   user.name = String::from("Cum");
+
+//   println!("{:?} name: {}", user, user.name);
+
+//   let user2 = User {
+//     email: String::from("heartbreak"),
+//     name: String::from("value"),
+//     gender: String::from("value"),
+//     ..user
+//   };
+
+//   let User {
+//     email: email,
+//     name: name,
+//     gender: gender,
+//     active: active,
+//   } = user2;
+
+//   println!("{:?} user", user);
+// }
 
 fn build_user(email: String, name: String) -> User {
   User {
