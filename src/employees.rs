@@ -7,40 +7,60 @@ struct Employee {
   dept: String,
 }
 
-pub fn run() {
-  let mut employees_map: EmployeesMap = HashMap::new();
+struct Company {
+  employees_map: EmployeesMap,
+}
 
-  let Some(res) = add_employee_to_dept("Add Sally to Engineering", &mut employees_map) else {
+pub fn run() {
+  let mut company = Company {
+    employees_map: HashMap::new(),
+  };
+
+  let Some(res) = company.add_employee_to_dept("Add Sally to Engineering") else {
     return;
   };
 
   println!("Response {:#?}", res);
 
-  add_employee_to_dept("Add Amir to Sales", &mut employees_map);
-  add_employee_to_dept("Add Fola to Sales", &mut employees_map);
-  add_employee_to_dept("Add Kola to Engineering", &mut employees_map);
-  add_employee_to_dept("Add Tunji to Marketing", &mut employees_map);
-  add_employee_to_dept("Add Kola to Sales", &mut employees_map);
+  company.add_employee_to_dept("Add Amir to Sales");
+  company.add_employee_to_dept("Add Fola to Sales");
+  company.add_employee_to_dept("Add Kola to Engineering");
+  company.add_employee_to_dept("Add Tunji to Marketing");
+  company.add_employee_to_dept("Add Kola to Sales");
 
-  println!("Employees map {:#?}", employees_map);
+  println!("Employees map {:#?}", company.employees_map);
 
-  let Some(engineers) = fetch_employees_in_dept("Engineering", &mut employees_map) else {
+  let Some(engineers) = company.fetch_employees_in_dept("Engineering") else {
     return;
   };
 
   println!("Employees in Engineering: {:#?}", engineers);
-  println!("All Employees: {:#?}", fetch_all_employees(&employees_map));
+  println!("All Employees: {:#?}", company.fetch_all_employees());
 }
 
-/// accepts string of format "Add {name} to {department}"
-fn add_employee_to_dept(text: &str, employees_map: &mut EmployeesMap) -> Option<Vec<String>> {
-  let Employee { name, dept } = parse_employee_from_text(text)?;
+impl Company {
+  /// accepts string of format "Add {name} to {department}"
+  fn add_employee_to_dept(self: &mut Self, text: &str) -> Option<Vec<String>> {
+    let Employee { name, dept } = parse_employee_from_text(text)?;
 
-  let from_dept = employees_map.entry(dept).or_insert(vec![]);
+    let from_dept = self.employees_map.entry(dept).or_insert(vec![]);
 
-  from_dept.push(name);
+    from_dept.push(name);
 
-  Some(from_dept.to_vec())
+    Some(from_dept.to_vec())
+  }
+
+  fn fetch_employees_in_dept(self: &Self, dept: &str) -> Option<Vec<String>> {
+    let employees = self.employees_map.get(dept)?;
+
+    Some(employees.to_vec())
+  }
+
+  fn fetch_all_employees(self: &Self) -> Vec<&String> {
+    let all_employees: Vec<&String> = self.employees_map.values().flatten().collect();
+
+    all_employees
+  }
 }
 
 fn parse_employee_from_text(text: &str) -> Option<Employee> {
@@ -62,16 +82,4 @@ fn parse_employee_from_text(text: &str) -> Option<Employee> {
   let dept: String = words.collect();
 
   return Some(Employee { name, dept });
-}
-
-fn fetch_employees_in_dept(dept: &str, employees_map: &mut EmployeesMap) -> Option<Vec<String>> {
-  let employees = employees_map.get(dept)?;
-
-  Some(employees.to_vec())
-}
-
-fn fetch_all_employees(employees_map: &EmployeesMap) -> Vec<&String> {
-  let all_employees: Vec<&String> = employees_map.values().flatten().collect();
-
-  all_employees
 }
