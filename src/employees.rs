@@ -7,7 +7,7 @@ struct Employee {
   dept: String,
 }
 
-struct Company {
+pub struct Company {
   employees_map: EmployeesMap,
 }
 
@@ -16,11 +16,7 @@ pub fn run() {
     employees_map: HashMap::new(),
   };
 
-  let Some(res) = company.add_employee_to_dept("Add Sally to Engineering") else {
-    return;
-  };
-
-  println!("Response {:#?}", res);
+  company.add_employee_to_dept("Add Sally to Engineering");
 
   company.add_employee_to_dept("Add Amir to Sales");
   company.add_employee_to_dept("Add Fola to Sales");
@@ -40,26 +36,28 @@ pub fn run() {
 
 impl Company {
   /// accepts string of format "Add {name} to {department}"
-  fn add_employee_to_dept(self: &mut Self, text: &str) -> Option<Vec<String>> {
-    let Employee { name, dept } = parse_employee_from_text(text)?;
+  fn add_employee_to_dept(&mut self, text: &str) -> bool {
+    let Some(Employee { name, dept }) = parse_employee_from_text(text) else {
+      return false;
+    };
 
     let from_dept = self.employees_map.entry(dept).or_insert(vec![]);
 
     from_dept.push(name);
 
-    Some(from_dept.to_vec())
+    true
   }
 
-  fn fetch_employees_in_dept(self: &Self, dept: &str) -> Option<Vec<String>> {
-    let employees = self.employees_map.get(dept)?;
+  fn fetch_employees_in_dept(&self, dept: &str) -> Option<Vec<String>> {
+    self.employees_map.get(dept).map(|names| {
+      let mut sorted_names = names.clone();
+      sorted_names.sort_unstable();
 
-    let mut employees = employees.to_vec();
-    employees.sort_unstable();
-
-    Some(employees)
+      sorted_names
+    })
   }
 
-  fn fetch_all_employees(self: &Self) -> Vec<&String> {
+  fn fetch_all_employees(&self) -> Vec<&String> {
     let mut all_employees: Vec<&String> = self.employees_map.values().flatten().collect();
 
     all_employees.sort_unstable();
