@@ -53,11 +53,16 @@ impl Company {
   fn fetch_employees_in_dept(self: &Self, dept: &str) -> Option<Vec<String>> {
     let employees = self.employees_map.get(dept)?;
 
-    Some(employees.to_vec())
+    let mut employees = employees.to_vec();
+    employees.sort_unstable();
+
+    Some(employees)
   }
 
   fn fetch_all_employees(self: &Self) -> Vec<&String> {
-    let all_employees: Vec<&String> = self.employees_map.values().flatten().collect();
+    let mut all_employees: Vec<&String> = self.employees_map.values().flatten().collect();
+
+    all_employees.sort_unstable();
 
     all_employees
   }
