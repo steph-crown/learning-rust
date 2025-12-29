@@ -30,6 +30,8 @@ pub fn run() {
     return;
   };
 
+  // let x = company.fetch_employees_in_dept("Engineering").unwrap();
+
   println!("Employees in Engineering: {:#?}", engineers);
   println!("All Employees: {:#?}", company.fetch_all_employees());
 }
