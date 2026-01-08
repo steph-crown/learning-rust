@@ -13,14 +13,6 @@ pub enum HttpMethod {
   PATCH,
 }
 
-#[derive(Debug)]
-pub struct Request {
-  method: HttpMethod,
-  path: String,
-  version: String,
-  headers: HashMap<String, String>,
-  body: String,
-}
 // GET /index.html HTTP/1.1\r\nHost: example.com\r\nUser-Agent: Mozilla\r\n\r\n
 impl Request {
   pub fn new(str: &str) -> Option<Request> {
@@ -37,6 +29,76 @@ impl Request {
 
   pub fn header(&self, key: &str) -> Option<&String> {
     self.headers.get(&key.to_lowercase())
+  }
+}
+
+#[repr(u16)]
+#[derive(Debug, Clone, Copy)]
+pub enum StatusCode {
+  Ok = 200,
+  Created = 201,
+  Accepted = 202,
+  MovedPermanently = 301,
+  Found = 302,
+  BadRequest = 400,
+  Unauthorized = 401,
+  InternalServerError = 500,
+}
+
+#[derive(Debug)]
+pub struct Request {
+  method: HttpMethod,
+  path: String,
+  version: String,
+  headers: HashMap<String, String>,
+  body: String,
+}
+
+pub struct Response {
+  status_code: StatusCode,
+  headers: HashMap<String, String>,
+  body: String,
+}
+
+impl Response {
+  pub fn new(status_code: StatusCode, body: String, headers: HashMap<String, String>) -> Self {
+    Self {
+      status_code,
+      headers,
+      body,
+    }
+  }
+
+  pub fn reason_phrase(&self) -> String {
+    match self.status_code {
+      StatusCode::Ok => "OK".to_string(),
+      StatusCode::Created => "Created".to_string(),
+      StatusCode::BadRequest => "Bad Request".to_string(),
+      StatusCode::InternalServerError => "Internal Server Error".to_string(),
+      _ => "Unknown Status".to_string(),
+    }
+  }
+
+  pub fn parse(&self) -> String {
+    let code_num = self.status_code as u16;
+    let reason_phrase = self.reason_phrase();
+
+    // let mut headers = String::new();
+
+    // for (key, value) in self.headers.iter() {
+    //   headers = format!("{headers}\r\n{key}: {value}");
+    // }
+    let headers: String = self
+      .headers
+      .iter()
+      .map(|(key, value)| format!("{key}: {value}"))
+      .collect::<Vec<String>>()
+      .join("\r\n");
+
+    let body = &self.body;
+
+    let start_line = format!("HTTP/1.1 {code_num} {reason_phrase}");
+    format!("{start_line}\r\n{headers}\r\n\r\n{body}")
   }
 }
 

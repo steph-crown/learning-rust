@@ -1,4 +1,4 @@
-use std::num::NonZeroU32;
+use std::{collections::HashMap, num::NonZeroU32};
 
 // mod collections;
 // mod employees;
@@ -20,5 +20,14 @@ fn main() {
     return ();
   };
 
-  println!("{:#?} {}", request, " ".is_empty());
+  let mut headers = HashMap::new();
+  headers.insert("Content-Type".to_string(), "application/json".to_string());
+  headers.insert("Sintent-Type".to_string(), "application/json".to_string());
+
+  let response = http::Response::new(http::StatusCode::Created, "body".to_string(), headers);
+
+  let response = http::Response::parse(&response);
+
+  // println!("{:#?} {}", request, " ".is_empty());
+  println!("{:#?}", response);
 }
