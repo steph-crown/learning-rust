@@ -14,6 +14,19 @@ enum Command {
   UPPERCASE,
   REVERSE,
   QUIT,
+  Unknown,
+}
+
+impl Command {
+  fn from_str(s: &str) -> Command {
+    match s {
+      "ECHO" => Command::ECHO,
+      "UPPERCASE" => Command::UPPERCASE,
+      "REVERSE" => Command::REVERSE,
+      "QUIT" => Command::QUIT,
+      _ => Command::Unknown,
+    }
+  }
 }
 
 fn main() {
@@ -49,25 +62,26 @@ fn handle_connection(stream: &mut TcpStream) {
 }
 
 fn process_line(content: &str, stream: &mut TcpStream) -> ControlFlow {
-  let output: String;
+  // let output: String;
 
   let mut tokens = content.split(" ");
-  let first = tokens.next();
+  let first = tokens.next().unwrap_or("");
   let rest = tokens.collect::<Vec<&str>>().join(" ");
   let mut quit = false;
+  let command = Command::from_str(first);
 
-  match first {
-    Some("ECHO") => output = rest,
-    Some("UPPERCASE") => output = rest.to_uppercase(),
-    Some("REVERSE") => output = rest.chars().rev().collect(),
-    Some("QUIT") => {
-      output = "Goodbye!".to_string();
+  let output: String = match command {
+    Command::ECHO => rest.to_string(),
+    Command::UPPERCASE => rest.to_uppercase(),
+    Command::REVERSE => rest.chars().rev().collect(),
+    Command::QUIT => {
       quit = true;
+      "Goodbye!".to_string()
     }
-    _ => {
-      output = "Incorrect command; Enter one of ECHO, UPPERCAE, REVERSE, QUIT".to_string();
+    Command::Unknown => {
+      "Incorrect command; Enter one of ECHO, UPPERCASE, REVERSE, QUIT".to_string()
     }
-  }
+  };
 
   if let Err(e) = stream.write_all(format!("{}\n", output).as_bytes()) {
     eprintln!("Failed to write to stream: {}", e);
