@@ -49,11 +49,11 @@ fn handle_connection(stream: &mut TcpStream) {
 }
 
 fn process_line(content: &str, stream: &mut TcpStream) -> ControlFlow {
-  let mut output = String::new();
+  let output: String;
 
-  let mut tokens = content.split_ascii_whitespace();
+  let mut tokens = content.split(" ");
   let first = tokens.next();
-  let rest = tokens.collect::<Vec<&str>>().join("");
+  let rest = tokens.collect::<Vec<&str>>().join(" ");
   let mut quit = false;
 
   match first {
@@ -64,7 +64,9 @@ fn process_line(content: &str, stream: &mut TcpStream) -> ControlFlow {
       output = "Goodbye!".to_string();
       quit = true;
     }
-    _ => eprintln!("Error"),
+    _ => {
+      output = "Incorrect command; Enter one of ECHO, UPPERCAE, REVERSE, QUIT".to_string();
+    }
   }
 
   if let Err(e) = stream.write_all(format!("{}\n", output).as_bytes()) {
