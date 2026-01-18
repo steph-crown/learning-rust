@@ -1,7 +1,10 @@
 use std::{
+  collections::HashMap,
   io::{BufRead, BufReader, Write},
   net::{TcpListener, TcpStream},
 };
+
+use crate::http::Response;
 
 // --- Types and Enums ---
 
@@ -55,8 +58,19 @@ impl TcpServer {
     for stream in listener.incoming() {
       match stream {
         Ok(mut stream) => {
-          println!("New connection: {:?}", stream.peer_addr().unwrap());
-          self.handle_connection(&mut stream);
+          println!("New connection: {:?}", stream);
+
+          let mut headers = HashMap::new();
+          headers.insert("Content-Type".to_string(), "text/html".to_string());
+
+          let response = Response::new(
+            crate::http::StatusCode::Ok,
+            "{'ad': 3}".to_string(),
+            headers,
+          );
+          let formatted = response.parse();
+          let _ = stream.write_all(format!("{}", formatted).as_bytes());
+          // self.handle_connection(&mut stream);
         }
         Err(e) => {
           eprintln!("Connection failed: {}", e);
@@ -106,8 +120,15 @@ impl TcpServer {
       }
     };
 
+    let mut headers = HashMap::new();
+    headers.insert("Content-Type".to_string(), "application/json".to_string());
+    headers.insert("Sintent-Type".to_string(), "application/json".to_string());
+
+    let response = Response::new(crate::http::StatusCode::Ok, "sjsjs".to_string(), headers);
+    let formatted = response.parse();
+
     // Write the result back to the client
-    if let Err(e) = stream.write_all(format!("{}\n", output).as_bytes()) {
+    if let Err(e) = stream.write_all(format!("{}", formatted).as_bytes()) {
       eprintln!("Write error: {}", e);
       return ControlFlow::Break;
     }
