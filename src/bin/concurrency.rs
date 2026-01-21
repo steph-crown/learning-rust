@@ -1,12 +1,15 @@
 use std::{
   collections::VecDeque,
-  sync::{Arc, Mutex},
+  sync::{
+    Arc, Mutex,
+    mpsc::{self, Receiver, Sender, SyncSender},
+  },
   thread::{self, JoinHandle},
 };
 
 fn main() {
   // shared_counter();
-  producer_consumer();
+  producer_consumer_channel();
 }
 
 fn shared_counter() {
@@ -65,3 +68,21 @@ fn producer_consumer() {
   producer.join().unwrap();
   consumer.join().unwrap();
 }
+
+fn producer_consumer_channel() {
+  let (tx, rx): (SyncSender<u32>, Receiver<u32>) = mpsc::sync_channel(10);
+
+  let producer = thread::spawn(move || {
+    for i in 1..101 {
+      tx.send(i).unwrap();
+    }
+  });
+
+  for received in rx {
+    println!("{received}")
+  }
+
+  producer.join().unwrap();
+}
+
+// when to use channel vs mutex
