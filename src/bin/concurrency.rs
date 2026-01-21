@@ -1,10 +1,10 @@
+use std::sync::Mutex;
 use std::sync::mpsc::{self, Receiver, Sender};
 use std::thread;
 use std::time::Duration;
 
 fn main() {
   let (tx, rx): (Sender<String>, Receiver<String>) = mpsc::channel();
-  let (_x, _y): (String, String);
 
   let handle = thread::spawn(move || {
     for i in 1..10 {
@@ -24,14 +24,31 @@ fn main() {
     println!("j {j}")
   }
 
-  for i in 1..15 {
-    println!("finished? {} ", handle.is_finished(),);
+  // for i in 1..15 {
+  //   // println!("finished? {} ", handle.is_finished(),);
 
-    println!("hi number {i} from the main thread!");
-    thread::sleep(Duration::from_millis(1));
-  }
+  //   // println!("hi number {i} from the main thread!");
+  //   thread::sleep(Duration::from_millis(1));
+  // }
 
   handle.join().unwrap();
 
   // println!("{x}");
+
+  let d = Mutex::new(8);
+  // let e = d.lock().unwrap();
+  // *e = 9;
+
+  let m = Mutex::new(5);
+
+  {
+    let mut num = m.lock().unwrap();
+    *num = 6;
+
+    let mut e = d.lock().unwrap();
+    *e = 9;
+  }
+
+  println!("m = {m:?}");
+  // e += 9;
 }

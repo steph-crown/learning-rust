@@ -42,6 +42,8 @@ pub fn main() {
   let x = Rc::new("4".to_string());
   let y = &x;
   let z = Rc::clone(&x);
+  let d = &*z;
+  // let c = *z;
   let a = Rc::downgrade(&x);
   let b = a.upgrade();
   println!("count {}", Rc::weak_count(&x));
