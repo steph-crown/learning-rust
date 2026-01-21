@@ -1,54 +1,33 @@
-use std::sync::Mutex;
-use std::sync::mpsc::{self, Receiver, Sender};
-use std::thread;
-use std::time::Duration;
+use std::{
+  sync::{Arc, Mutex},
+  thread::{self, JoinHandle},
+};
 
 fn main() {
-  let (tx, rx): (Sender<String>, Receiver<String>) = mpsc::channel();
+  shared_counter();
+}
 
-  let handle = thread::spawn(move || {
-    for i in 1..10 {
-      println!("hi number {i} from the spawned thread!");
-      thread::sleep(Duration::from_millis(1));
+fn shared_counter() {
+  let counter = Arc::new(Mutex::new(0));
+  let mut handles: Vec<JoinHandle<()>> = Vec::new();
 
-      tx.send("jdjjddjdj".to_string()).unwrap();
-    }
-  });
+  for _ in 0..10 {
+    let counter = Arc::clone(&counter);
+    let handle = thread::spawn(move || {
+      for _ in 0..1000 {
+        let mut num = counter.lock().unwrap();
+        *num += 1;
+      }
+      // counter += 1;
+    });
 
-  println!("finished? {}", handle.is_finished());
-  // let xmm = tx.send("jj".to_string());
-
-  // let b = rx.recv().unwrap();
-
-  for j in rx {
-    println!("j {j}")
+    handles.push(handle);
   }
 
-  // for i in 1..15 {
-  //   // println!("finished? {} ", handle.is_finished(),);
-
-  //   // println!("hi number {i} from the main thread!");
-  //   thread::sleep(Duration::from_millis(1));
-  // }
-
-  handle.join().unwrap();
-
-  // println!("{x}");
-
-  let d = Mutex::new(8);
-  // let e = d.lock().unwrap();
-  // *e = 9;
-
-  let m = Mutex::new(5);
-
-  {
-    let mut num = m.lock().unwrap();
-    *num = 6;
-
-    let mut e = d.lock().unwrap();
-    *e = 9;
+  for handle in handles {
+    handle.join().unwrap();
   }
 
-  println!("m = {m:?}");
-  // e += 9;
+  // let num = *counter;
+  println!("total {}", *counter.lock().unwrap())
 }
