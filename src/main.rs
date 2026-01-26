@@ -15,7 +15,7 @@ fn main() {
   // crate::lifetimes::run();
 
   let Some(request) = http::Request::new(
-    "GET /index.html  HTTP/1.1\r\nHost: example.com\r\nUser-Agent: Mozilla\r\n\r\nname=FirstName+LastName&email=bsmth%40example.com",
+    "GET /sleep HTTP/1.1\r\nHost: example.com\r\nUser-Agent: Mozilla\r\n\r\nname=FirstName+LastName&email=bsmth%40example.com",
   ) else {
     return ();
   };
